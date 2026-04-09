@@ -10,18 +10,42 @@ final class ExtraServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->registerConfig();
+        $this->registerBindings();
+        $this->app->booted(
+            static fn () => app(namespace\Contracts\ExtraContract::class)
+        );
+    }
+
+    public function boot(): void
+    {
+        $this->bootPublishes();
+    }
+
+    private function registerConfig(): void
+    {
         $this->mergeConfigFrom(
             __DIR__.'/../config/extra.php',
             'extra'
         );
     }
 
-    public function boot(): void
+    private function registerBindings(): void
     {
-        if ($this->app->runningInConsole()) {
-            $this->publishes([
-                __DIR__.'/../config/extra.php' => config_path('extra.php'),
-            ], 'extra-config');
-        }
+        $this->app->singletonIf(
+            namespace\Contracts\ExtraContract::class,
+            namespace\Extra::class,
+        );
+        $this->app->alias(
+            namespace\Contracts\ExtraContract::class,
+            'extra'
+        );
+    }
+
+    private function bootPublishes(): void
+    {
+        $this->publishes([
+            __DIR__.'/../config/extra.php' => config_path('extra.php'),
+        ], 'extra-config');
     }
 }
