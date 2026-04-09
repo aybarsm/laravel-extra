@@ -6,14 +6,14 @@ namespace Aybarsm\Laravel\Extra;
 
 use Illuminate\Support\ServiceProvider;
 
-final class ExtraServiceProvider extends ServiceProvider
+final class LaravelExtraServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
         $this->registerConfig();
         $this->registerBindings();
         $this->app->booted(
-            static fn () => app(namespace\Contracts\ExtraContract::class)
+            static fn () => app(namespace\Contracts\LaravelExtraContract::class)
         );
     }
 
@@ -25,20 +25,20 @@ final class ExtraServiceProvider extends ServiceProvider
     private function registerConfig(): void
     {
         $this->mergeConfigFrom(
-            __DIR__.'/../config/extra.php',
-            'extra'
+            __DIR__ . '/../config/laravel-extra.php',
+            'laravel-extra'
         );
     }
 
     private function registerBindings(): void
     {
         $this->app->singletonIf(
-            namespace\Contracts\ExtraContract::class,
-            namespace\Extra::class,
+            namespace\Contracts\LaravelExtraContract::class,
+            namespace\LaravelExtra::class,
         );
         $this->app->alias(
-            namespace\Contracts\ExtraContract::class,
-            'extra',
+            namespace\Contracts\LaravelExtraContract::class,
+            'laravel-extra',
         );
 
         $this->app->singletonIf(
@@ -47,14 +47,14 @@ final class ExtraServiceProvider extends ServiceProvider
         );
         $this->app->alias(
             namespace\Contracts\Support\ValidateContract::class,
-            'extra.support.validate',
+            'laravel-extra.support.validate',
         );
     }
 
     private function bootPublishes(): void
     {
         $this->publishes([
-            __DIR__.'/../config/extra.php' => config_path('extra.php'),
-        ], 'extra-config');
+            __DIR__ . '/../config/laravel-extra.php' => config_path('laravel-extra.php'),
+        ], 'laravel-extra-config');
     }
 }

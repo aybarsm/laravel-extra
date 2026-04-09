@@ -37,11 +37,11 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Aybarsm\\Laravel\\Extra\\ExtraServiceProvider"
+                "Aybarsm\\Laravel\\Extra\\LaravelExtraServiceProvider"
             ]
         },
         "aliases": {
-            "Extra": "Aybarsm\\Laravel\\Extra\\Facades\\Extra"
+            "Extra": "Aybarsm\\Laravel\\Extra\\Facades\\LaravelExtra"
         }
     },
     "config": {

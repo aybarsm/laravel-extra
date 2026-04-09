@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Fluent;
 
-final class Extra implements namespace\Contracts\ExtraContract
+final class LaravelExtra implements namespace\Contracts\LaravelExtraContract
 {
     use HasSupportAccess;
     private static Fluent $data;
@@ -35,8 +35,8 @@ final class Extra implements namespace\Contracts\ExtraContract
     private function config(string $key, mixed $default = null, bool $forcePrefix = true): mixed
     {
         $key = str($key)->split('#\.#', -1, PREG_SPLIT_NO_EMPTY)->toArray();
-        if ($forcePrefix && $key[0] !== 'extra') {
-            array_unshift($key, 'extra');
+        if ($forcePrefix && $key[0] !== 'laravel-extra') {
+            array_unshift($key, 'laravel-extra');
         }
         $key = implode('.', $key);
         return filled($ret = value(config($key))) ? $ret : $default;

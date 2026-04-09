@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Aybarsm\Laravel\Extra\Facades;
 use Illuminate\Support\Facades\Facade;
-use Aybarsm\Laravel\Extra\Contracts\ExtraContract;
+use Aybarsm\Laravel\Extra\Contracts\LaravelExtraContract;
 
 /**
- * @see ExtraContract
+ * @see LaravelExtraContract
  */
-final class Extra extends Facade
+final class LaravelExtra extends Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        return ExtraContract::class;
+        return LaravelExtraContract::class;
     }
 }
