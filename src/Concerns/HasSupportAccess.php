@@ -10,6 +10,6 @@ trait HasSupportAccess
 {
     public static function validate(): ValidateContract
     {
-        return app('extra.support.validate');
+        return app('laravel-extra.support.validate');
     }
 }
