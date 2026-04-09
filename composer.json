@@ -39,6 +39,9 @@
             "providers": [
                 "Aybarsm\\Laravel\\Extra\\ExtraServiceProvider"
             ]
+        },
+        "aliases": {
+            "Extra": "Aybarsm\\Laravel\\Extra\\Facades\\Extra"
         }
     },
     "config": {

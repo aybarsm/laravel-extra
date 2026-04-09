@@ -4,18 +4,26 @@ declare(strict_types=1);
 
 namespace Aybarsm\Laravel\Extra;
 
+use Aybarsm\Laravel\Extra\Concerns\HasSupportAccess;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Fluent;
 
-final class Extra
+final class Extra implements namespace\Contracts\ExtraContract
 {
+    use HasSupportAccess;
     private static Fluent $data;
 
     public function __construct()
     {
         $this->registerMixins();
         Event::dispatch(namespace\Events\LaravelExtraInitialised::class, $this);
+    }
+
+    public function getCache(): ?array
+    {
+        return $this->getCacheStore()?->get($this->getCacheKey(), []);
     }
 
     private static function data(): Fluent
@@ -48,11 +56,6 @@ final class Extra
         return Cache::store($store);
     }
 
-    private function getCache(): ?array
-    {
-        return $this->getCacheStore()?->get($this->getCacheKey(), []);
-    }
-
     private function putCache(array $context): void
     {
         $this->getCacheStore()?->forever($this->getCacheKey(), $context);
@@ -69,13 +72,13 @@ final class Extra
             $cache['mixins'] = $this->buildMixinDiscovery();
         }
 
+        $this->putCache($cache);
+
         foreach($cache['mixins'] as $bind => $mixins){
             foreach($mixins as $mixin => $replace){
-                $bind::mixin($mixin, $replace);
+                $bind::mixin(app()->make($mixin), $replace);
             }
         }
-
-        $this->putCache($cache);
 
         self::data()->set('mixins.registered', true);
     }
@@ -85,7 +88,16 @@ final class Extra
         $bindReflections = [];
         $ret = [];
         foreach(self::config('mixins', []) as $class){
+            self::throw_if(
+                !class_exists($class),
+                sprintf('Mixin class [%s] does not exist.', $class)
+            );
+
             $ref = new \ReflectionClass($class);
+            self::throw_if(
+                !$ref->isInstantiable(),
+                sprintf('Mixin class [%s] is not instantiable.', $class)
+            );
             self::throw_if(
                 !$ref->hasConstant('BIND'),
                 sprintf('Mixin class [%s] does not have a binding class constant.', $class)
@@ -108,6 +120,92 @@ final class Extra
 
             if (!isset($ret[$bind])) $ret[$bind] = [];
             $ret[$bind][$class] = $replace;
+        }
+
+        return $ret;
+    }
+    public function getArtisanMeta(): array
+    {
+        if (self::data()->has('artisan.meta')){
+            return self::data()->get('artisan.meta', []);
+        }
+
+        $cache = $this->getCache() ?? [];
+        if (!array_key_exists('artisanMeta', $cache)) {
+            $cache['artisanMeta'] = $this->buildArtisanCommandMeta();
+        }
+
+        $this->putCache($cache);
+
+        self::data()->set('artisan.meta', $cache['artisanMeta']);
+        return $cache['artisanMeta'];
+    }
+    private function buildArtisanCommandMeta(): array
+    {
+        $ret = [
+            'commands' => [],
+            'mapping' => [],
+        ];
+
+        foreach(Artisan::all() as $command => $object){
+            $ret['commands'][$command] = [
+                'name' => $object->getName(),
+                'aliases' => $object->getAliases(),
+                'class' => get_class($object),
+                'definition' => self::buildArtisanCommandMetaDefinition($object->getDefinition()),
+            ];
+
+            $ret['mapping'][$command] = $command;
+
+            foreach($ret['commands'][$command]['aliases'] as $alias){
+                $ret['mapping'][$alias] = $command;
+            }
+        }
+
+        return $ret;
+    }
+
+    private static function buildArtisanCommandMetaDefinition(
+        \Symfony\Component\Console\Input\InputDefinition $def
+    ): array
+    {
+        $ret = [
+            'arguments' => [],
+            'options' => [],
+        ];
+
+        foreach(['arguments' => $def->getArguments(), 'options' => $def->getOptions()] as $section => $items){
+            foreach($items as $name => $item){
+                /** @var \Symfony\Component\Console\Input\InputArgument|\Symfony\Component\Console\Input\InputOption $item */
+                $ref = new \ReflectionObject($item);
+                $mode = value($ref->getProperty('mode')->getValue($item));
+                $suggested = $ref->getProperty('suggestedValues')->getValue($item);
+                if (is_callable($suggested)){
+                    $suggested = app()->call($suggested);
+                }
+                $ret[$section][$name] = [
+                    'name' => $name,
+                    'default' => $item->getDefault(),
+                    'description' => $item->getDescription(),
+                    'mode' => $mode,
+                    'suggested' => $suggested,
+                ];
+                if ($section === 'arguments') {
+                    $ret[$section][$name]['is'] = [
+                        'required' => self::validate()::flagsHas($mode, $item::REQUIRED),
+                        'optional' => self::validate()::flagsHas($mode, $item::OPTIONAL),
+                        'array' => self::validate()::flagsHas($mode, $item::IS_ARRAY),
+                    ];
+                }elseif ($section === 'options') {
+                    $ret[$section][$name]['is'] = [
+                        'none' => self::validate()::flagsHas($mode, $item::VALUE_NONE),
+                        'required' => self::validate()::flagsHas($mode, $item::VALUE_REQUIRED),
+                        'optional' => self::validate()::flagsHas($mode, $item::VALUE_OPTIONAL),
+                        'array' => self::validate()::flagsHas($mode, $item::VALUE_IS_ARRAY),
+                        'negatable' => self::validate()::flagsHas($mode, $item::VALUE_NEGATABLE),
+                    ];
+                }
+            }
         }
 
         return $ret;

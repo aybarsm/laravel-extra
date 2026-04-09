@@ -38,7 +38,16 @@ final class ExtraServiceProvider extends ServiceProvider
         );
         $this->app->alias(
             namespace\Contracts\ExtraContract::class,
-            'extra'
+            'extra',
+        );
+
+        $this->app->singletonIf(
+            namespace\Contracts\Support\ValidateContract::class,
+            namespace\Support\Validate::class,
+        );
+        $this->app->alias(
+            namespace\Contracts\Support\ValidateContract::class,
+            'extra.support.validate',
         );
     }
 
