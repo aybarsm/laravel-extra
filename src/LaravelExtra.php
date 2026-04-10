@@ -147,12 +147,15 @@ final class LaravelExtra implements namespace\Contracts\LaravelExtraContract
             'mapping' => [],
         ];
 
+
         foreach(Artisan::all() as $command => $object){
+            $definition = self::buildArtisanCommandMetaDefinition($object->getDefinition());
             $ret['commands'][$command] = [
                 'name' => $object->getName(),
-                'aliases' => $object->getAliases(),
                 'class' => get_class($object),
-                'definition' => self::buildArtisanCommandMetaDefinition($object->getDefinition()),
+                'aliases' => $object->getAliases(),
+                'arguments' => $definition['arguments'],
+                'options' => $definition['options'],
             ];
 
             $ret['mapping'][$command] = $command;
