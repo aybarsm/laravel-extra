@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Aybarsm\Laravel\Extra\Contracts\Support;
 
-use Aybarsm\Laravel\Extra\Enums\ModeMatch;
+use Enums\ModeMatch;
 
 interface ValidateContract
 {

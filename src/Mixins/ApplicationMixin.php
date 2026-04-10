@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Artisan;
 final class ApplicationMixin
 {
     const string BIND = \Illuminate\Foundation\Application::class;
-
     public static function getArtisanCommandMeta(): \Closure
     {
         return static function (null|string|object $command = null): ?array {

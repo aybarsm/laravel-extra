@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Aybarsm\Laravel\Extra\Support;
 
 use Aybarsm\Laravel\Extra\Contracts\Support\ValidateContract;
-use Aybarsm\Laravel\Extra\Enums\ModeMatch;
+use Enums\ModeMatch;
 use Illuminate\Support\Arr;
 
 final class Validate implements ValidateContract
