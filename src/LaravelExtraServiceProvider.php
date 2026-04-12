@@ -49,6 +49,19 @@ final class LaravelExtraServiceProvider extends ServiceProvider
             namespace\Contracts\Support\ValidateContract::class,
             'laravel-extra.support.validate',
         );
+
+        $this->app->bindIf(
+            namespace\Contracts\Dto\ConsoleCommandContract::class,
+            namespace\Dto\ConsoleCommand::class,
+        );
+        $this->app->bindIf(
+            namespace\Contracts\Dto\ConsoleCommandArgumentContract::class,
+            namespace\Dto\ConsoleCommandArgument::class,
+        );
+        $this->app->bindIf(
+            namespace\Contracts\Dto\ConsoleCommandOptionContract::class,
+            namespace\Dto\ConsoleCommandOption::class,
+        );
     }
 
     private function bootPublishes(): void

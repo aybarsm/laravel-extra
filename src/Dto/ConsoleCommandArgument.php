@@ -8,5 +8,4 @@ use Aybarsm\Laravel\Extra\Enums\ConsoleCommandInputType;
 
 class ConsoleCommandArgument extends namespace\AbstractConsoleCommandInput implements ConsoleCommandArgumentContract
 {
-
 }

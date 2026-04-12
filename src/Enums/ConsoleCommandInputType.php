@@ -4,14 +4,22 @@ declare(strict_types=1);
 
 namespace Aybarsm\Laravel\Extra\Enums;
 
-use Aybarsm\Extra\Support\Concerns\HasEnumHelpers;
+use Aybarsm\Extra\Contracts\Concerns\HasEnumHelpersContract;
+use Aybarsm\Extra\Concerns\HasEnumHelpers;
+use Aybarsm\Laravel\Extra\Contracts\Dto\ConsoleCommandArgumentContract;
+use Aybarsm\Laravel\Extra\Contracts\Dto\ConsoleCommandOptionContract;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
-enum ConsoleCommandInputType
+enum ConsoleCommandInputType implements HasEnumHelpersContract
 {
     use HasEnumHelpers;
     case ARGUMENT;
     case OPTION;
+
+    public function getAbstractClass(): string
+    {
+        return $this->isArgument() ? ConsoleCommandArgumentContract::class : ConsoleCommandOptionContract::class;
+    }
 
     public function isArgument(): bool
     {

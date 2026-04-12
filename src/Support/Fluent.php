@@ -22,6 +22,37 @@ final class Fluent extends \Illuminate\Support\Fluent
         }
     }
 
+    public function get($key, mixed $default = null): mixed
+    {
+        return parent::get(data_key($key), $default);
+    }
+
+    public function set($key, mixed $value): static
+    {
+        return parent::set(data_key($key), $value);
+    }
+
+    public function has($key): bool
+    {
+        return parent::has($this->multiKey($key));
+    }
+
+    public function hasAny($keys): bool
+    {
+        return parent::hasAny($this->multiKey($keys));
+    }
+
+    public function whenHas($key, callable $callback, ?callable $default = null)
+    {
+        return parent::whenHas(data_key($key), $callback, $default);
+    }
+
+    public function value($key, $default = null): mixed
+    {
+        $key = data_key($key);
+        return value($this->has($key) ? $this->get($key) : $default);
+    }
+
     public function isBlank(): bool
     {
         return blank($this->attributes);
@@ -57,11 +88,10 @@ final class Fluent extends \Illuminate\Support\Fluent
         return $this->lastHash !== $this->getCurrentHash();
     }
 
-    public function filled(string|int|array $key, string|ModeMatch $match = ModeMatch::ALL): bool
+    public function filled($key): bool
     {
-        $match = ModeMatch::make($match);
-        return $match->matchesBy(
-            of: $key,
+        return ModeMatch::ALL->matchesBy(
+            of: array_wrap($key),
             callback: static fn ($item) => filled($this->get($item))
         );
     }
@@ -133,5 +163,33 @@ final class Fluent extends \Illuminate\Support\Fluent
         $current -= $by;
         $this->set($key, $current);
         return $current;
+    }
+
+    public function hasOr(string|int|array $keys, mixed $default): mixed
+    {
+        foreach($this->multiKey($keys) as $key) {
+            if ($this->has($key)) {
+                return $this->get($key);
+            }
+        }
+
+        return value($default);
+    }
+
+    public function filledOr(string|int|array $keys, mixed $default): mixed
+    {
+        foreach($this->multiKey($keys) as $key) {
+            $ret = $this->get($key);
+            if (filled($ret)) {
+                return $ret;
+            }
+        }
+
+        return value($default);
+    }
+
+    protected function multiKey($keys): array
+    {
+        return array_unique(array_map(static fn ($key) => data_key($key), array_wrap($keys)));
     }
 }

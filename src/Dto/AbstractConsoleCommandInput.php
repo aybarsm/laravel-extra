@@ -13,7 +13,6 @@ use Aybarsm\Laravel\Extra\Contracts\Dto\ConsoleCommandArgumentContract;
 use Aybarsm\Laravel\Extra\Contracts\Dto\ConsoleCommandOptionContract;
 abstract class AbstractConsoleCommandInput implements ConsoleCommandInputContract
 {
-    use HasFluentData;
     public readonly ConsoleCommandInputType $type;
     public function __construct(
         ConsoleCommandInputType|string $type,
@@ -35,9 +34,11 @@ abstract class AbstractConsoleCommandInput implements ConsoleCommandInputContrac
     ): ConsoleCommandArgumentContract|ConsoleCommandOptionContract
     {
         $isArg = is_a($input, SymfonyInputArgument::class);
+        $type = (is_a($input, SymfonyInputArgument::class) ? ConsoleCommandInputType::ARGUMENT : ConsoleCommandInputType::OPTION);
+
         $ref = new \ReflectionObject($input);
         $args = [
-            'type' => (is_a($input, SymfonyInputArgument::class) ? ConsoleCommandInputType::ARGUMENT : ConsoleCommandInputType::OPTION),
+            'type' => $type,
             'name' => $input->getName(),
             'mode' => value($ref->getProperty('mode')->getValue($input)),
             'description' => $input->getDescription(),
@@ -47,7 +48,8 @@ abstract class AbstractConsoleCommandInput implements ConsoleCommandInputContrac
             'position' => $position,
             'commandClass' => $commandClass,
         ];
-        return new static(...$args);
+
+        return app()->makeWith($type->getAbstractClass(), $args);
     }
 
     public function getType(): ConsoleCommandInputType
@@ -117,5 +119,15 @@ abstract class AbstractConsoleCommandInput implements ConsoleCommandInputContrac
             'position' => $this->getPosition(),
             'commandClass' => $this->getCommandClass(),
         ];
+    }
+
+    public function jsonSerialize(): mixed
+    {
+        return $this->toArray();
+    }
+
+    public function toJson($options = 0): string
+    {
+        return json_encode($this->jsonSerialize(), $options);
     }
 }

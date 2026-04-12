@@ -14,4 +14,12 @@ trait HasFluentData
         if (!isset(static::$data)) static::$data = new Fluent();
         return static::$data;
     }
+
+    protected static function getDataKey(
+        string|int|null|iterable|\Stringable $key,
+        bool $forceSelf = true,
+    ): ?string
+    {
+        return data_key($key, ($forceSelf ? static::class : null));
+    }
 }

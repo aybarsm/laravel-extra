@@ -17,10 +17,10 @@ class ConsoleCommandOption extends namespace\AbstractConsoleCommandInput impleme
         ?string $description = null,
         mixed $default = null,
         array $suggestedValues = [],
-        ?int $pos = null,
-        ?string $command = null,
+        ?int $position = null,
+        ?string $commandClass = null,
     ) {
-        parent::__construct($type, $name, $mode, $description, $default, $suggestedValues);
+        parent::__construct($type, $name, $mode, $description, $default, $suggestedValues, $position, $commandClass);
         $this->shortcut = $shortcut;
     }
 
@@ -44,15 +44,5 @@ class ConsoleCommandOption extends namespace\AbstractConsoleCommandInput impleme
         $ret = parent::toArray();
         $ret['shortcut'] = $this->shortcut;
         return $ret;
-    }
-
-    public function jsonSerialize(): mixed
-    {
-        return $this->toArray();
-    }
-
-    public function toJson($options = 0): string
-    {
-        return json_encode($this->jsonSerialize(), $options);
     }
 }
