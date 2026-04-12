@@ -9,7 +9,9 @@ use Aybarsm\Laravel\Extra\Contracts\Dto\ConsoleCommandInputContract;
 use Aybarsm\Laravel\Extra\Enums\ConsoleCommandInputType;
 use Symfony\Component\Console\Input\InputArgument as SymfonyInputArgument;
 use Symfony\Component\Console\Input\InputOption as SymfonyInputOption;
-abstract final class ConsoleCommandInput implements ConsoleCommandInputContract
+use Aybarsm\Laravel\Extra\Contracts\Dto\ConsoleCommandArgumentContract;
+use Aybarsm\Laravel\Extra\Contracts\Dto\ConsoleCommandOptionContract;
+abstract class AbstractConsoleCommandInput implements ConsoleCommandInputContract
 {
     use HasFluentData;
     public readonly ConsoleCommandInputType $type;
@@ -19,19 +21,18 @@ abstract final class ConsoleCommandInput implements ConsoleCommandInputContract
         public readonly int            $mode,
         public readonly ?string        $description = null,
         public readonly mixed          $default = null,
-        public readonly ?string        $shortcut = null,
         public readonly array          $suggestedValues = [],
-        public readonly ?int           $pos = null,
-        public readonly ?string        $command = null,
+        public readonly ?int           $position = null,
+        public readonly ?string        $commandClass = null,
     ) {
         $this->type = ConsoleCommandInputType::make($type);
     }
 
     public static function make(
         SymfonyInputArgument|SymfonyInputOption $input,
-        ?int $pos = null,
-        ?string $command = null,
-    ): self
+        ?int $position = null,
+        ?string $commandClass = null,
+    ): ConsoleCommandArgumentContract|ConsoleCommandOptionContract
     {
         $isArg = is_a($input, SymfonyInputArgument::class);
         $ref = new \ReflectionObject($input);
@@ -43,10 +44,50 @@ abstract final class ConsoleCommandInput implements ConsoleCommandInputContract
             'default' => $input->getDefault(),
             'shortcut' => $isArg ? null : $input->getShortcut(),
             'suggestedValues' => value($ref->getProperty('suggestedValues')->getValue($input)),
-            'pos' => $pos,
-            'command' => $command,
+            'position' => $position,
+            'commandClass' => $commandClass,
         ];
-        return new self(...$args);
+        return new static(...$args);
+    }
+
+    public function getType(): ConsoleCommandInputType
+    {
+        return $this->type;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function getMode(): int
+    {
+        return $this->mode;
+    }
+
+    public function getDescription(): string
+    {
+        return $this->description;
+    }
+
+    public function getDefault(): mixed
+    {
+        return $this->default;
+    }
+
+    public function getSuggestedValues(): array
+    {
+        return $this->suggestedValues;
+    }
+
+    public function getPosition(): ?int
+    {
+        return $this->position;
+    }
+
+    public function getCommandClass(): ?string
+    {
+        return $this->commandClass;
     }
 
     public function isRequired(): bool
@@ -64,13 +105,17 @@ abstract final class ConsoleCommandInput implements ConsoleCommandInputContract
         return flags_has($this->mode, $this->type->getArrayFlag());
     }
 
-    public function isNone(): bool
+    public function toArray(): array
     {
-        return flags_has($this->mode, $this->type->getNoneFlag());
-    }
-
-    public function isNegatable(): bool
-    {
-        return flags_has($this->mode, $this->type->getNegatableFlag());
+        return [
+            'type' => $this->getType(),
+            'name' => $this->getName(),
+            'mode' => $this->getMode(),
+            'description' => $this->getDescription(),
+            'default' => $this->getDefault(),
+            'suggestedValues' => $this->getSuggestedValues(),
+            'position' => $this->getPosition(),
+            'commandClass' => $this->getCommandClass(),
+        ];
     }
 }

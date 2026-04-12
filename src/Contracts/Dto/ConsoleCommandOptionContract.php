@@ -8,4 +8,6 @@ interface ConsoleCommandOptionContract extends namespace\ConsoleCommandInputCont
 {
     public function isNone(): bool;
     public function isNegatable(): bool;
+
+    public function getShortcut(): ?string;
 }

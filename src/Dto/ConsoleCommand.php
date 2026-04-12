@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Aybarsm\Laravel\Extra\Dto;
 
-use Aybarsm\Laravel\Extra\Dto\ConsoleCommandInput;
+use Aybarsm\Laravel\Extra\Dto\AbstractConsoleCommandInput;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Illuminate\Console\Command as LaravelCommand;
 use Aybarsm\Laravel\Extra\Contracts\Dto\ConsoleCommandContract;
 /**
  * @param array<int, string> $aliases
- * @param array<string, ConsoleCommandInput> $arguments
- * @param array<string, ConsoleCommandInput> $options
+ * @param array<string, AbstractConsoleCommandInput> $arguments
+ * @param array<string, AbstractConsoleCommandInput> $options
  */
 final class ConsoleCommand implements ConsoleCommandContract
 {
@@ -41,7 +41,7 @@ final class ConsoleCommand implements ConsoleCommandContract
         foreach(['arguments' => $def->getArguments(), 'options' => $def->getOptions()] as $type => $inputs) {
             $posKey = "{$type}Pos";
             foreach($inputs as $name => $input) {
-                $args[$type][$name] = ConsoleCommandInput::make($input, $meta[$posKey], $args['class']);
+                $args[$type][$name] = AbstractConsoleCommandInput::make($input, $meta[$posKey], $args['class']);
                 $meta[$posKey]++;
             }
         }
