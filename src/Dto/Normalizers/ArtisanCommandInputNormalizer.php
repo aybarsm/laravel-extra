@@ -10,7 +10,7 @@ use Spatie\LaravelData\Normalizers\Normalizer;
 
 use Symfony\Component\Console\Input\InputArgument as SymfonyInputArgument;
 use Symfony\Component\Console\Input\InputOption as SymfonyInputOption;
-use Aybarsm\Laravel\Extra\Enums\ArtisanCommandInputType;
+use Aybarsm\Laravel\Extra\Enums\ConsoleCommandInputType;
 final class ArtisanCommandInputNormalizer implements Normalizer
 {
     public function normalize(mixed $value): null|array|Normalized
@@ -35,7 +35,7 @@ final class ArtisanCommandInputNormalizer implements Normalizer
 
         /** @var SymfonyInputArgument|SymfonyInputOption $value */
         return [
-            'type' => ($isArg ? ArtisanCommandInputType::ARGUMENT : ArtisanCommandInputType::OPTION),
+            'type' => ($isArg ? ConsoleCommandInputType::ARGUMENT : ConsoleCommandInputType::OPTION),
             'name' => $value->getName(),
             'mode' => value($ref->getProperty('mode')->getValue($value)),
             'description' => $value->getDescription(),

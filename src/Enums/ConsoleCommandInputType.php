@@ -7,7 +7,7 @@ namespace Aybarsm\Laravel\Extra\Enums;
 use Aybarsm\Extra\Support\Concerns\HasEnumHelpers;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
-enum ArtisanCommandInputType
+enum ConsoleCommandInputType
 {
     use HasEnumHelpers;
     case ARGUMENT;

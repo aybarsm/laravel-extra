@@ -7,7 +7,7 @@ namespace Aybarsm\Laravel\Extra\Enums;
 use Aybarsm\Extra\Support\Concerns\HasEnumHelpers;
 use Aybarsm\Laravel\Extra\Dto\ArtisanCommand;
 
-enum ArtisanCommandHas
+enum ConsoleCommandHas
 {
     use HasEnumHelpers;
 
