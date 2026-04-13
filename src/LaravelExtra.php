@@ -125,23 +125,6 @@ final class LaravelExtra implements namespace\Contracts\LaravelExtraContract
 
         return $ret;
     }
-    public function getArtisanMeta(): array
-    {
-        if (self::data()->has('artisan.meta')){
-            return self::data()->get('artisan.meta', []);
-        }
-
-        $cache = $this->getCache() ?? [];
-        if (!array_key_exists('artisanMeta', $cache)) {
-            $cache['artisanMeta'] = $this->buildArtisanCommandMeta();
-        }
-
-        $this->putCache($cache);
-
-        self::data()->set('artisan.meta', $cache['artisanMeta']);
-        return $cache['artisanMeta'];
-    }
-
 
     private static function throw_if(mixed $condition, mixed $message): void
     {

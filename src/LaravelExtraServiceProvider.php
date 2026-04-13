@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Aybarsm\Laravel\Extra;
 
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\ServiceProvider;
 
 final class LaravelExtraServiceProvider extends ServiceProvider
@@ -50,17 +51,12 @@ final class LaravelExtraServiceProvider extends ServiceProvider
             'laravel-extra.support.validate',
         );
 
-        $this->app->bindIf(
-            namespace\Contracts\Dto\ConsoleCommandContract::class,
-            namespace\Dto\ConsoleCommand::class,
-        );
-        $this->app->bindIf(
-            namespace\Contracts\Dto\ConsoleCommandArgumentContract::class,
-            namespace\Dto\ConsoleCommandArgument::class,
-        );
-        $this->app->bindIf(
-            namespace\Contracts\Dto\ConsoleCommandOptionContract::class,
-            namespace\Dto\ConsoleCommandOption::class,
+        $this->app->singletonIf(
+            abstract: namespace\Contracts\Dto\ConsoleCommandCollectionContract::class,
+            concrete: static fn () => new namespace\Dto\ConsoleCommandCollection(array_map(
+                static fn ($command) => namespace\Dto\ConsoleCommand::make($command),
+                Artisan::all()
+            )),
         );
     }
 

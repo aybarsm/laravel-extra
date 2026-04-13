@@ -8,6 +8,6 @@ use Aybarsm\Laravel\Extra\Contracts\Support\ValidateContract;
 
 interface LaravelExtraContract
 {
-    public function getArtisanMeta(): array;
+    public function getCache(): ?array;
     public static function validate(): ValidateContract;
 }

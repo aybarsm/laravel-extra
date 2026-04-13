@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Aybarsm\Laravel\Extra\Concerns;
 
-use Aybarsm\Laravel\Extra\Dto\ArtisanCommands;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Artisan;
 use Symfony\Component\Console\Input\InputDefinition;
-trait BuildsArtisanCommandsDto
+
+trait BuildsConsoleCommandsCollection
 {
     private function buildArtisanCommandsDto(): ArtisanCommands
     {

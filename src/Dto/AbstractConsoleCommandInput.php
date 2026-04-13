@@ -43,13 +43,16 @@ abstract class AbstractConsoleCommandInput implements ConsoleCommandInputContrac
             'mode' => value($ref->getProperty('mode')->getValue($input)),
             'description' => $input->getDescription(),
             'default' => $input->getDefault(),
-            'shortcut' => $isArg ? null : $input->getShortcut(),
             'suggestedValues' => value($ref->getProperty('suggestedValues')->getValue($input)),
             'position' => $position,
             'commandClass' => $commandClass,
         ];
 
-        return app()->makeWith($type->getAbstractClass(), $args);
+        if ($type->isOption()){
+            $args['shortcut'] = $input->getShortcut();
+        }
+
+        return new static(...$args);
     }
 
     public function getType(): ConsoleCommandInputType

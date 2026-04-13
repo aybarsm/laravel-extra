@@ -188,6 +188,19 @@ final class Fluent extends \Illuminate\Support\Fluent
         return value($default);
     }
 
+    public function getOrSet(string|int $key, mixed $default): mixed
+    {
+        $key = data_key($key);
+
+        if ($this->has($key)) {
+            return $this->get($key);
+        }
+
+        $default = value($default);
+        $this->set($key, $default);
+        return $default;
+    }
+
     protected function multiKey($keys): array
     {
         return array_unique(array_map(static fn ($key) => data_key($key), array_wrap($keys)));

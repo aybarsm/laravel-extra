@@ -12,6 +12,8 @@ use Illuminate\Support\Arr;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Illuminate\Console\Command as LaravelCommand;
 use Aybarsm\Laravel\Extra\Contracts\Dto\ConsoleCommandContract;
+use Aybarsm\Laravel\Extra\Contracts\Dto\ConsoleCommandCollectionContract;
+
 /**
  * @param array<int, string> $aliases
  * @param array<string, AbstractConsoleCommandInput> $arguments
@@ -30,8 +32,12 @@ final class ConsoleCommand implements ConsoleCommandContract
     ){
     }
 
-    public static function make(SymfonyCommand|LaravelCommand $command): ConsoleCommandContract
+    public static function make(
+        ConsoleCommandContract|SymfonyCommand|LaravelCommand $command
+    ): ConsoleCommandContract
     {
+        if (is_a($command, ConsoleCommandContract::class)) return $command;
+
         $meta = ['argumentsPos' => 0, 'optionsPos' => 0];
         $args = [
             'name' => $command->getName(),
@@ -44,14 +50,15 @@ final class ConsoleCommand implements ConsoleCommandContract
 
         $def = $command->getDefinition();
         foreach(['arguments' => $def->getArguments(), 'options' => $def->getOptions()] as $type => $inputs) {
+            $concrete = $type === 'arguments' ? namespace\ConsoleCommandArgument::class : namespace\ConsoleCommandOption::class;
             $posKey = "{$type}Pos";
             foreach($inputs as $name => $input) {
-                $args[$type][$name] = AbstractConsoleCommandInput::make($input, $meta[$posKey], $args['class']);
+                $args[$type][$name] = $concrete::make($input, $meta[$posKey], $args['class']);
                 $meta[$posKey]++;
             }
         }
 
-        return app()->makeWith(ConsoleCommandContract::class, $args);
+        return new self(...$args);
     }
 
     public function getClass(): string
@@ -83,6 +90,22 @@ final class ConsoleCommand implements ConsoleCommandContract
     {
         return $this->options;
     }
+
+    public function getNameMapping(): array
+    {
+        return self::getData()->hasOr(
+            self::getDataKey('mapping'),
+            function (){
+                $ret = [$this->getName() => $this->getName()];
+
+                foreach($this->getAliases() as $alias) {
+                    $ret[$alias] = $this->getName();
+                }
+
+                return $ret;
+            }
+        );
+    }
     public function hasAny(ConsoleCommandHas|string ...$of): bool
     {
         return ModeMatch::ANY->matchesBy(
@@ -106,5 +129,64 @@ final class ConsoleCommand implements ConsoleCommandContract
             self::getDataKey("has.{$of->name}"),
             fn () => $of->has($this)
         );
+    }
+
+    public function hasAlias(): bool
+    {
+        return $this->has(ConsoleCommandHas::ALIAS);
+    }
+    public function hasArgument(): bool
+    {
+        return $this->has(ConsoleCommandHas::ARGUMENT);
+    }
+
+    public function hasArgumentRequired(): bool
+    {
+        return $this->has(ConsoleCommandHas::ARGUMENT_REQUIRED);
+    }
+    public function hasArgumentOptional(): bool
+    {
+        return $this->has(ConsoleCommandHas::ARGUMENT_OPTIONAL);
+    }
+    public function hasArgumentArray(): bool
+    {
+        return $this->has(ConsoleCommandHas::ARGUMENT_ARRAY);
+    }
+    public function hasOption(): bool
+    {
+        return $this->has(ConsoleCommandHas::OPTION);
+    }
+    public function hasOptionRequired(): bool
+    {
+        return $this->has(ConsoleCommandHas::OPTION_REQUIRED);
+    }
+    public function hasOptionOptional(): bool
+    {
+        return $this->has(ConsoleCommandHas::OPTION_OPTIONAL);
+    }
+    public function hasOptionArray(): bool
+    {
+        return $this->has(ConsoleCommandHas::OPTION_ARRAY);
+    }
+    public function hasOptionNone(): bool
+    {
+        return $this->has(ConsoleCommandHas::OPTION_NONE);
+    }
+    public function hasOptionNegatable(): bool
+    {
+        return $this->has(ConsoleCommandHas::OPTION_NEGATABLE);
+    }
+
+    public function hasInputRequired(): bool
+    {
+        return $this->hasArgumentRequired() || $this->hasOptionRequired();
+    }
+    public function hasInputOptional(): bool
+    {
+        return $this->hasArgumentOptional() || $this->hasOptionOptional();
+    }
+    public function hasInputArray(): bool
+    {
+        return $this->hasArgumentArray() || $this->hasOptionArray();
     }
 }
