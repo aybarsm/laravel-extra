@@ -2,23 +2,34 @@
 
 declare(strict_types=1);
 
-namespace Aybarsm\Laravel\Extra\Dto;
+namespace Aybarsm\Laravel\Extra\Dto\ProviderPackage;
 use Aybarsm\Extra\Concerns\HasMetaData;
+use Aybarsm\Laravel\Extra\Concerns\Dto\ProviderPackage\HasAssets;
 use Aybarsm\Laravel\Extra\Concerns\Dto\ProviderPackage\HasBasePath;
+use Aybarsm\Laravel\Extra\Concerns\Dto\ProviderPackage\HasBladeComponents;
 use Aybarsm\Laravel\Extra\Concerns\Dto\ProviderPackage\HasComposer;
+use Aybarsm\Laravel\Extra\Concerns\Dto\ProviderPackage\HasConfigs;
 use Aybarsm\Laravel\Extra\Concerns\Dto\ProviderPackage\HasEssentials;
+use Aybarsm\Laravel\Extra\Concerns\Dto\ProviderPackage\HasMigrations;
 use Aybarsm\Laravel\Extra\Concerns\Dto\ProviderPackage\HasProviderDetails;
+use Aybarsm\Laravel\Extra\Concerns\Dto\ProviderPackage\HasRoutes;
+use Aybarsm\Laravel\Extra\Contracts\Dto\PackageProviderContract;
 use Aybarsm\Laravel\Extra\Custom\Spatie\LaravelPackageTools\Concerns;
 use Aybarsm\Laravel\Extra\Exceptions\ProviderPackageException;
 use Illuminate\Support\Str;
 
-final class ProviderPackage
+final class ProviderPackage implements PackageProviderContract
 {
     use HasMetaData;
     use HasEssentials;
     use HasProviderDetails;
     use HasBasePath;
     use HasComposer;
+    use HasAssets;
+    use HasBladeComponents;
+    use HasConfigs;
+    use HasMigrations;
+    use HasRoutes;
 
     public function __construct(string $author, string $name, ?string $version = null)
     {

@@ -31,9 +31,8 @@ trait HasComposer
     }
     public function setHasComposer(bool $hasComposer = true): static
     {
-        throw_if(
-            $hasComposer && !$this->hasBasePath(),
-            ProviderPackageException::class,
+        $this->requireBasePathIf(
+            $hasComposer,
             'Base path need to be set to enable composer.'
         );
 

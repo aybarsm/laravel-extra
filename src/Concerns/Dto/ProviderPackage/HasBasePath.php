@@ -42,4 +42,18 @@ trait HasBasePath
         $this->basePath = realpath($path);
         return $this;
     }
+
+    protected function requireBasePathIf(
+        mixed $condition,
+        mixed $parameters,
+    ): void
+    {
+        if ($this->hasBasePath()) return;
+
+        throw_if(
+            fn() => value($condition, $this),
+            ProviderPackageException::class,
+            $parameters
+        );
+    }
 }
