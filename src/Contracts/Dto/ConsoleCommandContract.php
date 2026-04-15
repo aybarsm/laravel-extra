@@ -23,7 +23,7 @@ interface ConsoleCommandContract
     public function getAliases(): array;
     public function getArguments(): array;
     public function getOptions(): array;
-    public function getNameMapping(): array;
+    public function getAliasMapping(): array;
     public function has(ConsoleCommandHas|string $of): bool;
     public function hasAny(ConsoleCommandHas|string ...$of): bool;
     public function hasAll(ConsoleCommandHas|string ...$of): bool;

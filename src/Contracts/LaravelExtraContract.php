@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Aybarsm\Laravel\Extra\Contracts;
 
-use Aybarsm\Laravel\Extra\Contracts\Support\ValidateContract;
-
 interface LaravelExtraContract
 {
     public function getCache(): ?array;
-    public static function validate(): ValidateContract;
+    public static function registerMixin(
+        string|object $mixin,
+        string|object|null $bind = null,
+        ?bool $replace = null,
+    ): void;
 }

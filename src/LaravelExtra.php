@@ -4,33 +4,50 @@ declare(strict_types=1);
 
 namespace Aybarsm\Laravel\Extra;
 
-use Aybarsm\Laravel\Extra\Concerns\HasSupportAccess;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Artisan;
+use Aybarsm\Laravel\Extra\Concerns\HasFluentMetaData;
+use Aybarsm\Laravel\Extra\Concerns\Manager\ProcessesMixins;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Fluent;
 
-final class LaravelExtra implements namespace\Contracts\LaravelExtraContract
+final class LaravelExtra implements Contracts\LaravelExtraContract
 {
-    use HasSupportAccess;
-    private static Fluent $data;
+    use HasFluentMetaData, ProcessesMixins;
+    private const array CONF = [
+        'bind' => [
+            Contracts\Dto\ConsoleCommandArgumentContract::class => Dto\ConsoleCommandArgument::class,
+            Contracts\Dto\ConsoleCommandOptionContract::class => Dto\ConsoleCommandOption::class,
+            Contracts\Dto\ConsoleCommandContract::class => Dto\ConsoleCommand::class,
+        ],
+        'singleton' => [
+
+        ],
+    ];
 
     public function __construct()
     {
-        $this->registerMixins();
-        Event::dispatch(namespace\Events\LaravelExtraInitialised::class, $this);
+//        Event::listen(
+//            'bootstrapped: Illuminate\Foundation\Bootstrap\BootProviders',
+//            static function(): void {
+//                app(namespace\Contracts\LaravelExtraContract::class);
+//            }
+//        );
+//        $this->registerMixins();
+    }
+
+    public static function register(): void
+    {
+        if (self::getMetaData()->get('registered')) return;
+
+        foreach(self::CONF['bind'] as $abstract => $concrete) {
+            app()->bind($abstract, $concrete);
+        }
+
+        self::getMetaData()->set('registered', true);
     }
 
     public function getCache(): ?array
     {
         return $this->getCacheStore()?->get($this->getCacheKey(), []);
-    }
-
-    private static function data(): Fluent
-    {
-        if (!isset(self::$data)) self::$data = new Fluent();
-        return self::$data;
     }
 
     private function config(string $key, mixed $default = null, bool $forcePrefix = true): mixed
@@ -62,75 +79,10 @@ final class LaravelExtra implements namespace\Contracts\LaravelExtraContract
         $this->getCacheStore()?->forever($this->getCacheKey(), $context);
     }
 
-    private function registerMixins(): void
-    {
-        if (self::data()->get('mixins.registered')){
-            return;
-        }
-
-        $cache = $this->getCache() ?? [];
-        if (!array_key_exists('mixins', $cache)) {
-            $cache['mixins'] = $this->buildMixinDiscovery();
-        }
-
-        $this->putCache($cache);
-
-        foreach($cache['mixins'] as $bind => $mixins){
-            foreach($mixins as $mixin => $replace){
-                $bind::mixin(app()->make($mixin), $replace);
-            }
-        }
-
-        self::data()->set('mixins.registered', true);
-    }
-
-    private function buildMixinDiscovery(): array
-    {
-        $bindReflections = [];
-        $ret = [];
-        foreach(self::config('mixins', []) as $class){
-            self::throw_if(
-                !class_exists($class),
-                sprintf('Mixin class [%s] does not exist.', $class)
-            );
-
-            $ref = new \ReflectionClass($class);
-            self::throw_if(
-                !$ref->isInstantiable(),
-                sprintf('Mixin class [%s] is not instantiable.', $class)
-            );
-            self::throw_if(
-                !$ref->hasConstant('BIND'),
-                sprintf('Mixin class [%s] does not have a binding class constant.', $class)
-            );
-
-            $bind = $ref->getConstant('BIND');
-            self::throw_if(
-                !class_exists($class),
-                sprintf('Mixin class [%s] defined binding class [%s] does not exist.', $class, $bind)
-            );
-
-            $replace = $ref->hasConstant('REPLACE') && $ref->getConstant('REPLACE') === true;
-
-            $ref = $bindReflections[$bind] ?? ($bindReflections[$bind] = new \ReflectionClass($bind));
-            $method = $ref->hasMethod('mixin') ? $ref->getMethod('mixin') : null;
-            self::throw_if(
-                ! $method || ! $method->isStatic() || ! $method->isPublic(),
-                sprintf('Mixin class [%s] defined binding class [%s] does not have a valid mixin method.', $class, $bind)
-            );
-
-            if (!isset($ret[$bind])) $ret[$bind] = [];
-            $ret[$bind][$class] = $replace;
-        }
-
-        return $ret;
-    }
-
     private static function throw_if(mixed $condition, mixed $message): void
     {
-        $condition = value($condition);
         throw_if(
-            $condition,
+            value($condition),
             namespace\Exceptions\LaravelExtraException::class,
             value($message, $condition)
         );

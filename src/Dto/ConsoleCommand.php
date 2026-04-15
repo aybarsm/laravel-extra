@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Aybarsm\Laravel\Extra\Dto;
 
 use Aybarsm\Extra\Enums\ModeMatch;
-use Aybarsm\Laravel\Extra\Concerns\HasFluentData;
+use Aybarsm\Laravel\Extra\Concerns\HasFluentMetaData;
 use Aybarsm\Laravel\Extra\Dto\AbstractConsoleCommandInput;
 use Aybarsm\Laravel\Extra\Enums\ConsoleCommandHas;
 use Illuminate\Support\Arr;
@@ -21,7 +21,7 @@ use Aybarsm\Laravel\Extra\Contracts\Dto\ConsoleCommandCollectionContract;
  */
 final class ConsoleCommand implements ConsoleCommandContract
 {
-    use HasFluentData;
+    use HasFluentMetaData;
     public function __construct(
         public readonly string $class,
         public readonly string $name,
@@ -91,10 +91,10 @@ final class ConsoleCommand implements ConsoleCommandContract
         return $this->options;
     }
 
-    public function getNameMapping(): array
+    public function getAliasMapping(): array
     {
-        return self::getData()->hasOr(
-            self::getDataKey('mapping'),
+        return self::getMetaData()->hasOr(
+            self::getMetaDataKey('mapping'),
             function (){
                 $ret = [$this->getName() => $this->getName()];
 
@@ -125,8 +125,8 @@ final class ConsoleCommand implements ConsoleCommandContract
     public function has(ConsoleCommandHas|string $of): bool
     {
         $of = ConsoleCommandHas::make($of, false);
-        return self::getData()->hasOr(
-            self::getDataKey("has.{$of->name}"),
+        return self::getMetaData()->hasOr(
+            self::getMetaDataKey("has.{$of->name}"),
             fn () => $of->has($this)
         );
     }

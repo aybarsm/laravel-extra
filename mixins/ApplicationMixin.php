@@ -2,16 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Aybarsm\Laravel\Extra\Mixins;
-
+use Illuminate\Foundation\Application;
 use Aybarsm\Laravel\Extra\Facades\LaravelExtra;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Artisan;
 
-/** @mixin \Illuminate\Foundation\Application */
-final class ApplicationMixin
+/** @mixin Application */
+return new class
 {
-    final const string BIND = \Illuminate\Foundation\Application::class;
+    final const string BIND = Application::class;
     public static function getArtisanCommandMeta(): \Closure
     {
         return static function (null|string|object $command = null): ?array {
@@ -51,4 +50,4 @@ final class ApplicationMixin
             return Artisan::all()[$baseName] ?? null;
         };
     }
-}
+};

@@ -20,6 +20,7 @@
     "require": {
         "php": "^8.4",
         "laravel/framework": "^13.0",
+        "spatie/laravel-package-tools": "^1.0",
         "spatie/laravel-data": "^4.0",
         "aybarsm/php-extra": "dev-main"
     },
@@ -29,7 +30,10 @@
     "autoload": {
         "psr-4": {
             "Aybarsm\\Laravel\\Extra\\": "src"
-        }
+        },
+        "files": [
+            "src/helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
@@ -40,10 +44,10 @@
         "laravel": {
             "providers": [
                 "Aybarsm\\Laravel\\Extra\\LaravelExtraServiceProvider"
-            ]
-        },
-        "aliases": {
-            "Extra": "Aybarsm\\Laravel\\Extra\\Facades\\LaravelExtra"
+            ],
+            "aliases": {
+                "LaravelExtra": "Aybarsm\\Laravel\\Extra\\Facades\\LaravelExtra"
+            }
         }
     },
     "config": {

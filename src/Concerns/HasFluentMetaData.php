@@ -6,16 +6,16 @@ namespace Aybarsm\Laravel\Extra\Concerns;
 
 use Aybarsm\Laravel\Extra\Support\Fluent;
 
-trait HasFluentData
+trait HasFluentMetaData
 {
-    protected static Fluent $data;
-    protected static function getData(): Fluent
+    protected static Fluent $_metaData_;
+    protected static function getMetaData(): Fluent
     {
-        if (!isset(static::$data)) static::$data = new Fluent();
-        return static::$data;
+        if (!isset(static::$_metaData_)) static::$_metaData_ = new Fluent();
+        return static::$_metaData_;
     }
 
-    protected static function getDataKey(
+    protected static function getMetaDataKey(
         string|int|null|iterable|\Stringable $key,
         bool $forceSelf = true,
     ): ?string

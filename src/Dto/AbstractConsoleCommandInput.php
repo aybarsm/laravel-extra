@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Aybarsm\Laravel\Extra\Dto;
 
-use Aybarsm\Laravel\Extra\Concerns\HasFluentData;
+use Aybarsm\Laravel\Extra\Concerns\HasFluentMetaData;
 use Aybarsm\Laravel\Extra\Contracts\Dto\ConsoleCommandInputContract;
 use Aybarsm\Laravel\Extra\Enums\ConsoleCommandInputType;
 use Symfony\Component\Console\Input\InputArgument as SymfonyInputArgument;
